@@ -83,7 +83,8 @@ class GitHubOauthClient {
             localStorage.setItem(this.clientId, token)
         }
 
-        this._updateOctokit()
+        // Force refresh
+        window.location.reload()
     }
 
     _updateOctokit() {
@@ -132,18 +133,15 @@ class GitHubOauthClient {
     async codeExchange() {
         const { code, state } = url.pull('code', 'state')
 
-       
         const response = await fetch(`https://caf-fac.ca/gh.asp?code=${code}&state=${state}`)
         const data = await response.json()
 
         if (data.error) {
             console.error(data)
         } else {
-            token.set(data.access_token)
-            window.location.reload()
+            this.token = data.access_token
         }
     }
-
 
 }
 

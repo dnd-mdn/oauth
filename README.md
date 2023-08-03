@@ -10,4 +10,4 @@ By signing in with GitHub, you are allowing applications to act on your behalf. 
 
 ## 🪲 Issues
 
-Create a [new issue](https://github.com/dnd-mdn/oauth/issues/new") with a detailed description of the problem.
+Create a [new issue](https://github.com/dnd-mdn/oauth/issues/new) with a detailed description of the problem.

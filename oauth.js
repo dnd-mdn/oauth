@@ -132,18 +132,15 @@ class GitHubOauthClient {
     async codeExchange() {
         const { code, state } = url.pull('code', 'state')
 
-        try {
-            const response = await fetch(`https://caf-fac.ca/gh.asp?code=${code}&state=${state}`)
-            const data = await response.json()
+       
+        const response = await fetch(`https://caf-fac.ca/gh.asp?code=${code}&state=${state}`)
+        const data = await response.json()
 
-            if (data.error) {
-                console.error(data)
-            } else {
-                token.set(data.access_token)
-                window.location.reload()
-            }
-        } catch (e) {
-            console.error('Failed to exchange code for access token')
+        if (data.error) {
+            console.error(data)
+        } else {
+            token.set(data.access_token)
+            window.location.reload()
         }
     }
 

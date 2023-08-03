@@ -118,7 +118,7 @@ class GitHubOauthClient {
      */
     authorize(opts = {}) {
         window.location = 'https://github.com/login/oauth/authorize?' + new URLSearchParams({
-            clientId: opts.clientId || this.clientId,
+            client_id: this.clientId,
             redirect_uri: opts.redirect_uri || window.location,
             scope: opts.scope || 'public_repo',
             state: opts.state || Math.random().toString(36).substring(2),

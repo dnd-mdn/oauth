@@ -168,7 +168,7 @@ if (url.has('error')) {
 
 // Perform code exchange
 if (url.has('code', 'state')) {
-    await oauth.codeExchange()
+    await client.codeExchange()
 }
 
 

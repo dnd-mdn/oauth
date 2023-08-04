@@ -44,7 +44,7 @@
 
 
     <script type="module">
-        import client from './oauth.js'
+        import { client } from './oauth.js'
 
         client.user().then(user => {
             if (user) {

@@ -128,7 +128,7 @@ export class GitHubOauthClient {
 
 }
 
-const client = new GitHubOauthClient()
+export const client = new GitHubOauthClient()
 
 
 /**

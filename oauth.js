@@ -47,9 +47,6 @@ const url = {
     }
 }
 
-
-
-
 /**
  * GitHub OAuth web flow
  * @class
@@ -57,8 +54,9 @@ const url = {
 export class GitHubOauthClient {
 
     constructor(opts = {}) {
-        this.clientId = opts.clientId || '6502d8679dcf3f0105f8'
+        this.clientId = opts.clientId || 'Iv1.5dceb0507b750647'
         this.codeExchangeURL = opts.codeExchangeURL || 'https://caf-fac.ca/gh.asp'
+
         this.rest = new Octokit({ auth: this.token })
     }
 
@@ -80,14 +78,18 @@ export class GitHubOauthClient {
     /**
      * Begin web flow authorization
      */
-    authorize(opts = {}) {
-        window.location = 'https://github.com/login/oauth/authorize?' + new URLSearchParams({
-            client_id: this.clientId,
-            redirect_uri: opts.redirect_uri || window.location,
-            scope: opts.scope || 'read:org,public_repo',
-            state: opts.state || Math.random().toString(36).substring(2),
-            allow_signup: opts.allow_signup || false
-        })
+    authorize(log_in = true) {
+        if (log_in) {
+            window.location = 'https://github.com/login/oauth/authorize?' + new URLSearchParams({
+                client_id: this.clientId,
+                redirect_uri: window.location,
+                scope: 'read:org public_repo',
+                state: Math.random().toString(36).substring(2),
+                allow_signup: false
+            })
+        } else {
+            this.token = null
+        }
     }
 
     /**
@@ -107,61 +109,47 @@ export class GitHubOauthClient {
     }
 
     /**
-     * Get current user data
-     * @returns {Promise<Object|null>}
+     * Verify that authentication is set
+     * @returns {boolean}
      */
-    async user() {
+    async auth() {
         const auth = await this.rest.auth()
-
-        if (auth.type !== 'token') {
-            return null
-        }
-
-        try {
-            const user = await this.rest.users.getAuthenticated()
-            this._user = user.data
-            return this._user
-        } catch (e) {
-            return null
-        }
+        return auth.type === 'token'
     }
 
 }
-
-export const client = new GitHubOauthClient()
-
 
 /**
- * Button element used for sign in and status
- * @type {Element|null}
+ * Client instance
+ * @type {GitHubOauthClient}
  */
-const button = document.getElementById('gh-signin')
-
-// Add click event
-if (button) {
-    button.addEventListener('click', e => client.authorize())
-} else {
-    console.warn('Missing element #gh-signing')
-}
-
-// Check for user data
-client.user().then(user => {
-    if (user) {
-        button.className = 'btn btn-success disabled'
-        button.innerHTML = 'GitHub: ' + user.login
-    }
-})
-
-
-// Move error data to console
-if (url.has('error')) {
-    console.error(url.pull('error', 'error_description', 'error_uri', 'state'))
-}
+export const client = new GitHubOauthClient()
 
 // Perform code exchange
 if (url.has('code', 'state')) {
     await client.codeExchange()
 }
 
+// Move error data to console
+if (url.has('error')) {
+    console.error(url.pull('error', 'error_description', 'error_uri'))
+}
 
-export default client
+/**
+ * Sign in/out button
+ * @type {HTMLElement|null}
+ */
+const button = document.getElementById('gh-signin')
+
+// Update button
+if (button) {
+    try {
+        const user = await client.rest.users.getAuthenticated()
+        button.className = 'btn btn-outline-success'
+        button.innerHTML = `${user.data.login} - Sign out`
+
+        button.addEventListener('click', e => client.authorize(false))
+    } catch (e) {
+        button.addEventListener('click', e => client.authorize(true))
+    }
+}

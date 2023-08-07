@@ -14,7 +14,9 @@
             <div class="container">
                 <a class="navbar-brand" href="https://github.com/dnd-mdn">dnd-mdn</a>
                 <div class="d-flex">
-                    <button id="gh-signin" class="btn btn-outline-primary">GitHub: Sign in</button>
+                    <div class="btn-group" role="group" aria-label="Basic example">
+                        <button id="gh-signin" class="btn btn-outline-primary">Sign in with GitHub</button>
+                    </div>
                 </div>
             </div>
         </nav>
@@ -23,50 +25,67 @@
         <div class="container my-2">
             <h1 class="h3 mt-4">Sign in with GitHub</h1>
             <p class="lead">Simplifying our content management through GitHub integration</p>
+            
 
-            <div id="authenticated" class="alert alert-success mt-3 d-none" role="alert">
-                You are signed in as <a id="gh-login" target="_blank">Username</a>
+            <p>This page is an example of signing in to our frontend applications with your GitHub account.</p>
+            
+
+
+            <h2 class="h4 mt-4 mb-3">👤 User info</h2>
+            <div id="gh-user">
+                <div class="spinner-border spinner-border-sm text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
             </div>
-            <div id="unauthenticated" class="alert alert-warning mt-3 d-none" role="alert">
-                You are not signed in
-            </div>
-
-            <h2 class="h4 mt-4">📖 Overview</h2>
-            <p>Our frontend applications are an interface to simplify managing our content. A major benefit is the ability to run them in any web browser, even on DWAN 😲. GitHub then acts as the backend to store our content, but it can do much more than that. It provides an entire ecosystem of version control and hosting tools.</p>
-            <h2 class="h4 mt-4">🔐 Permissions</h2>
-            <p>By signing in with GitHub, you are allowing applications to act on your behalf. They can only perform actions on projects that you are allowed to contribute to, so you may need to request access from the owner. You can later review or revoke the application <a href="https://github.com/settings/connections/applications/6502d8679dcf3f0105f8" target="_blank">permissions</a>.</p>
-            <h2 class="h4 mt-4">🪲 Issues</h2>
-            <p>Create a <a href="https://github.com/dnd-mdn/oauth/issues/new" target="_blank">new issue</a> with a detailed description of the problem.</p>
-
-            <pre id="test"></pre>
         </div>
     </main>
-
 
     <script type="module">
         import { client } from './oauth.js'
 
-        client.user().then(user => {
-            if (user) {
-                const a = document.getElementById('gh-login')
+        async function userHTML() {
 
-                a.href = user.html_url
-                a.innerHTML = user.login
-
-                document.getElementById('authenticated').classList.remove('d-none')
-
-                client.rest.auth().then(console.log)
-
-                client.rest.orgs.getMembershipForAuthenticatedUser({
-                    org: 'dnd-mdn'
-                }).then(console.log)
-
-            } else {
-                document.getElementById('unauthenticated').classList.remove('d-none')
+            let html = '<h3 class="h5 mb-0">Account</h3>'
+            try {
+                const user = await client.rest.users.getAuthenticated()
+                html += `<p><a href="${user.data.html_url}" target="_blank">${user.data.login}</a> - ${user.data.name}</p>`
+            } catch (e) {
+                return '<p class="text-secondary">Sign in to view account information</p>'
             }
-        })
 
-        console.log(client)
+            html += '<h3 class="h5 mb-0">Role</h3>'
+            try {
+                const org = await client.rest.orgs.getMembershipForAuthenticatedUser({ org: 'dnd-mdn' })
+                html += `<p><a href="https://github.com/orgs/dnd-mdn/people" target="_blank">${org.data.role}</a></p>`
+            } catch (e) {
+                return html + '<p><span class="text-error">None</span> - You are not a member of the <a href="https://github.com/dnd-mdn">dnd-mdn</a> organization</p>'
+            }
+
+            html += '<h3 class="h5 mb-0">Repositories</h3>'
+            try {
+                const repos = await client.rest.repos.listForAuthenticatedUser({ affiliation: 'organization_member' })
+              
+                if (!repos.data.length) {
+                    throw new Error('No repositories')
+                }
+
+                html += '<ul class="list-inline">'
+                repos.data.forEach(repo => {
+                    if (repo.owner.login === 'dnd-mdn' && repo.permissions.push) {
+                        html += `<li class="list-inline-item"><a href="${repo.html_url}" target="_blank">${repo.name}</a></li>`
+                    }
+                })
+                html += '</ul>'
+            } catch (e) {
+                return html + '<p>You do not have access to modify any repositories</p>'
+            }
+
+            return html
+        }
+
+        // Display result
+        document.getElementById('gh-user').innerHTML = await userHTML()
+
     </script>
 
 </body>

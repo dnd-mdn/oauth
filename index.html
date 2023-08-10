@@ -14,9 +14,7 @@
             <div class="container">
                 <a class="navbar-brand" href="https://github.com/dnd-mdn">dnd-mdn</a>
                 <div class="d-flex">
-                    <div class="btn-group" role="group" aria-label="Basic example">
-                        <button id="gh-signin" class="btn btn-outline-primary">Sign in with GitHub</button>
-                    </div>
+                    <a id="gh-signin" href="#" class="nav-link text-primary">Sign in with GitHub</a>
                 </div>
             </div>
         </nav>
@@ -25,12 +23,7 @@
         <div class="container my-2">
             <h1 class="h3 mt-4">Sign in with GitHub</h1>
             <p class="lead">Simplifying our content management through GitHub integration</p>
-            
-
             <p>This page is an example of signing in to our frontend applications with your GitHub account.</p>
-            
-
-
             <h2 class="h4 mt-4 mb-3">👤 User info</h2>
             <div id="gh-user">
                 <div class="spinner-border spinner-border-sm text-primary" role="status">
@@ -41,43 +34,25 @@
     </main>
 
     <script type="module">
-        import { client } from './oauth.js'
+        import * as gh from './oauth.js'
 
         async function userHTML() {
 
             let html = '<h3 class="h5 mb-0">Account</h3>'
-            try {
-                const user = await client.rest.users.getAuthenticated()
-                html += `<p><a href="${user.data.html_url}" target="_blank">${user.data.login}</a> - ${user.data.name}</p>`
-            } catch (e) {
+
+            if (gh.user.login) {
+                html += `<p><a href="https://github.com/${gh.user.login}" targer="_blank">${gh.user.login}</a></p>`
+            } else {
                 return '<p class="text-secondary">Sign in to view account information</p>'
             }
 
             html += '<h3 class="h5 mb-0">Role</h3>'
+
             try {
-                const org = await client.rest.orgs.getMembershipForAuthenticatedUser({ org: 'dnd-mdn' })
-                html += `<p><a href="https://github.com/orgs/dnd-mdn/people" target="_blank">${org.data.role}</a></p>`
+                const { data } = await gh.rest.orgs.getMembershipForAuthenticatedUser({ org: 'dnd-mdn' })
+                html += `<p><a href="https://github.com/orgs/dnd-mdn/people" target="_blank">${data.role}</a></p>`
             } catch (e) {
                 return html + '<p><span class="text-error">None</span> - You are not a member of the <a href="https://github.com/dnd-mdn">dnd-mdn</a> organization</p>'
-            }
-
-            html += '<h3 class="h5 mb-0">Repositories</h3>'
-            try {
-                const repos = await client.rest.repos.listForAuthenticatedUser({ affiliation: 'organization_member' })
-              
-                if (!repos.data.length) {
-                    throw new Error('No repositories')
-                }
-
-                html += '<ul class="list-inline">'
-                repos.data.forEach(repo => {
-                    if (repo.owner.login === 'dnd-mdn' && repo.permissions.push) {
-                        html += `<li class="list-inline-item"><a href="${repo.html_url}" target="_blank">${repo.name}</a></li>`
-                    }
-                })
-                html += '</ul>'
-            } catch (e) {
-                return html + '<p>You do not have access to modify any repositories</p>'
             }
 
             return html

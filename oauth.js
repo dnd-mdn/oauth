@@ -5,151 +5,113 @@
 
 import { Octokit } from 'https://cdn.jsdelivr.net/npm/@octokit/rest@20.0.1/+esm'
 
-/**
- * Manipulate current URL
- * @type {Object}
- */
 const url = {
-
-    /**
-     * Test if parameter(s) are set
-     * @param {...string} args Parameter names
-     * @returns {boolean}
-     */
     has: (...args) => {
         const params = new URLSearchParams(window.location.search)
-
         for (let i = 0; i < args.length; i++) {
             if (!params.has(args[i])) {
                 return false
             }
         }
-
         return true
     },
-
-    /**
-     * Remove parameter(s) and return them
-     * @param {...string} args Parameter names
-     * @returns {Object}
-     */
     pull: (...args) => {
         const params = new URLSearchParams(window.location.search)
         let obj = {}
-
         for (let i = 0; i < args.length; i++) {
             obj[args[i]] = params.get(args[i])
             params.delete(args[i])
         }
-
         history.replaceState(null, '', '?' + params)
         return obj
     }
 }
 
-/**
- * GitHub OAuth web flow
- * @class
- */
-export class GitHubOauthClient {
+export const clientId = 'Iv1.5dceb0507b750647'
 
-    constructor(opts = {}) {
-        this.clientId = opts.clientId || 'Iv1.5dceb0507b750647'
-        this.codeExchangeURL = opts.codeExchangeURL || 'https://caf-fac.ca/gh.asp'
-
-        this.rest = new Octokit({ auth: this.token })
-    }
-
+export const user = {
     get token() {
-        return localStorage.getItem(this.clientId)
-    }
+        return localStorage.getItem('gh-token')
+    },
 
     set token(token) {
         if (token == null) {
-            localStorage.removeItem(this.clientId)
+            localStorage.removeItem('gh-token')
         } else {
-            localStorage.setItem(this.clientId, token)
+            localStorage.setItem('gh-token', token)
         }
+        localStorage.removeItem('gh-login')
+    },
 
-        // Force refresh
-        window.location.reload()
+    get login() {
+        return localStorage.getItem('gh-login')
+    },
+
+    set login(login) {
+        localStorage.setItem('gh-login', login)
+    },
+
+    clear() {
+        localStorage.removeItem('gh-token')
+        localStorage.removeItem('gh-login')
     }
-
-    /**
-     * Begin web flow authorization
-     */
-    authorize(log_in = true) {
-        if (log_in) {
-            window.location = 'https://github.com/login/oauth/authorize?' + new URLSearchParams({
-                client_id: this.clientId,
-                redirect_uri: window.location,
-                scope: 'read:org public_repo',
-                state: Math.random().toString(36).substring(2),
-                allow_signup: false
-            })
-        } else {
-            this.token = null
-        }
-    }
-
-    /**
-     * Exchange temporary code for a token
-     */
-    async codeExchange() {
-        const { code, state } = url.pull('code', 'state')
-
-        const response = await fetch(`https://caf-fac.ca/gh.asp?code=${code}&state=${state}`)
-        const data = await response.json()
-
-        if (data.error) {
-            console.error(data)
-        } else {
-            this.token = data.access_token
-        }
-    }
-
-    /**
-     * Verify that authentication is set
-     * @returns {boolean}
-     */
-    async auth() {
-        const auth = await this.rest.auth()
-        return auth.type === 'token'
-    }
-
 }
 
-/**
- * Client instance
- * @type {GitHubOauthClient}
- */
-export const client = new GitHubOauthClient()
+export const rest = new Octokit({ auth: user.token })
 
-// Perform code exchange
+export function authorize() {
+    user.clear()
+    window.location.replace('https://github.com/login/oauth/authorize?' + new URLSearchParams({
+        client_id: clientId,
+        redirect_uri: window.location,
+        state: Math.random().toString(36).substring(2),
+        allow_signup: false
+    }))
+}
+
+export function deauthorize() {
+    user.clear()
+    window.location.reload()
+}
+
+export async function codeExchange(code, state) {
+    const response = await fetch(`https://caf-fac.ca/gh/code-exchange.asp?code=${code}&state=${state}`)
+    const data = await response.json()
+
+    if (data.error) {
+        throw new Error(data.error)
+    } else {
+        return data.access_token
+    }
+}
+
 if (url.has('code', 'state')) {
-    await client.codeExchange()
+    const { code, state } = url.pull('code', 'state')
+    user.token = await codeExchange(code, state)
+    window.location.reload()
 }
 
-// Move error data to console
 if (url.has('error')) {
     console.error(url.pull('error', 'error_description', 'error_uri'))
 }
 
-/**
- * Sign in/out button
- * @type {HTMLElement|null}
- */
-const button = document.getElementById('gh-signin')
-
-// Update button
-if (button) {
+if (user.token && !user.login) {
     try {
-        const user = await client.rest.users.getAuthenticated()
-        button.className = 'btn btn-outline-success'
-        button.innerHTML = `${user.data.login} - Sign out`
-
-        button.addEventListener('click', e => client.authorize(false))
+        const { data } = await rest.users.getAuthenticated()
+        user.login = data.login
     } catch (e) {
-        button.addEventListener('click', e => client.authorize(true))
+        user.clear()
+    }
+}
+
+const signin = document.getElementById('gh-signin')
+
+if (signin) {
+    if (user.login) {
+        signin.className = 'text-success'
+        signin.innerHTML = `${user.login} - Sign out`
+        signin.addEventListener('click', e => deauthorize())
+    } else {
+        signin.addEventListener('click', e => authorize())
     }
 }

@@ -3,7 +3,9 @@
  * @see https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/authorizing-oauth-apps#web-application-flow
  */
 
+
 import { Octokit } from 'https://cdn.jsdelivr.net/npm/@octokit/rest@20.0.1/+esm'
+
 
 const url = {
     has: (...args) => {
@@ -27,29 +29,14 @@ const url = {
     }
 }
 
-export const clientId = 'Iv1.5dceb0507b750647'
-
-
-export const user = {
-    get token() {
-        return localStorage.getItem('gh-token')
-    },
-
-    set token(token) {
-        if (token == null) {
-            localStorage.removeItem('gh-token')
-        } else {
-            localStorage.setItem('gh-token', token)
-        }
-    },
-
-    login: null
+if (url.has('error')) {
+    console.error(url.pull('error', 'error_description', 'error_uri'))
 }
 
-export const rest = new Octokit({ auth: user.token })
+
+export const clientId = 'Iv1.5dceb0507b750647'
 
 export function authorize() {
-    user.token = null
     window.location.replace('https://github.com/login/oauth/authorize?' + new URLSearchParams({
         client_id: clientId,
         redirect_uri: window.location,
@@ -58,56 +45,56 @@ export function authorize() {
     }))
 }
 
-export function deauthorize() {
-    user.token = null
-    window.location.reload()
-}
+export async function codeExchange() {
+    const { code, state } = url.pull('code', 'state')
 
-export async function codeExchange(code, state) {
+    if (!code || !state) {
+        throw new Error('Missing url param for codeExchange')
+    }
+
     const response = await fetch(`https://caf-fac.ca/gh/code-exchange.asp?code=${code}&state=${state}`)
     const data = await response.json()
 
     if (data.error) {
         throw new Error(data.error)
     } else {
-        return data.access_token
+        localStorage.setItem('gh-token', data.access_token)
     }
 }
 
-if (url.has('code', 'state')) {
-    const { code, state } = url.pull('code', 'state')
-    user.token = await codeExchange(code, state)
+export function deauthorize() {
+    localStorage.removeItem('gh-token')
     window.location.reload()
 }
 
-if (url.has('error')) {
-    console.error(url.pull('error', 'error_description', 'error_uri'))
+if (url.has('code', 'state')) {
+    await codeExchange()
 }
 
-if (user.token) {
-    try {
-        const { data } = await rest.users.getAuthenticated()
-        user.login = data.login
-    } catch (e) {
-        user.token = null
-        window.location.reload()
-    }
-}
+export const rest = new Octokit({
+    auth: localStorage.getItem('gh-token')
+})
+
 
 const signin = document.getElementById('gh-signin')
 
-if (signin) {
-    if (user.login) {
-        signin.className = 'text-success'
-        signin.innerHTML = `${user.login} - Sign out`
-        signin.addEventListener('click', function(e) {
-            e.preventDefault()
-            deauthorize()
-        })
-    } else {
-        signin.addEventListener('click', function(e) {
-            e.preventDefault()
-            authorize()
-        })
+if (localStorage.getItem('gh-token')) {
+    try {
+        const { data } = await rest.users.getAuthenticated()
+        if (signin) {
+            signin.className = 'text-success'
+            signin.innerHTML = `${data.login} - Sign out`
+            signin.addEventListener('click', function(e) {
+                e.preventDefault()
+                deauthorize()
+            })
+        }
+    } catch (e) {
+        deauthorize()
     }
+} else if (signin) {
+    signin.addEventListener('click', function(e) {
+        e.preventDefault()
+        authorize()
+    })
 }

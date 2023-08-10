@@ -34,22 +34,19 @@
     </main>
 
     <script type="module">
-        import * as gh from './oauth.js'
+        import { rest } from './oauth.js'
 
         async function userHTML() {
+            const auth = await rest.auth()
 
-            let html = '<h3 class="h5 mb-0">Account</h3>'
-
-            if (gh.user.login) {
-                html += `<p><a href="https://github.com/${gh.user.login}" targer="_blank">${gh.user.login}</a></p>`
-            } else {
-                return '<p class="text-secondary">Sign in to view account information</p>'
+            if (auth.type !== 'token') {
+                return '<p>Sign in to view account status</p>'
             }
 
-            html += '<h3 class="h5 mb-0">Role</h3>'
+            let html = '<h3 class="h5 mb-0">Role</h3>'
 
             try {
-                const { data } = await gh.rest.orgs.getMembershipForAuthenticatedUser({ org: 'dnd-mdn' })
+                const { data } = await rest.orgs.getMembershipForAuthenticatedUser({ org: 'dnd-mdn' })
                 html += `<p><a href="https://github.com/orgs/dnd-mdn/people" target="_blank">${data.role}</a></p>`
             } catch (e) {
                 return html + '<p><span class="text-error">None</span> - You are not a member of the <a href="https://github.com/dnd-mdn">dnd-mdn</a> organization</p>'

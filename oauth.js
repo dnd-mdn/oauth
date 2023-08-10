@@ -29,6 +29,7 @@ const url = {
 
 export const clientId = 'Iv1.5dceb0507b750647'
 
+
 export const user = {
     get token() {
         return localStorage.getItem('gh-token')
@@ -40,27 +41,15 @@ export const user = {
         } else {
             localStorage.setItem('gh-token', token)
         }
-        localStorage.removeItem('gh-login')
     },
 
-    get login() {
-        return localStorage.getItem('gh-login')
-    },
-
-    set login(login) {
-        localStorage.setItem('gh-login', login)
-    },
-
-    clear() {
-        localStorage.removeItem('gh-token')
-        localStorage.removeItem('gh-login')
-    }
+    login: null
 }
 
 export const rest = new Octokit({ auth: user.token })
 
 export function authorize() {
-    user.clear()
+    user.token = null
     window.location.replace('https://github.com/login/oauth/authorize?' + new URLSearchParams({
         client_id: clientId,
         redirect_uri: window.location,
@@ -70,7 +59,7 @@ export function authorize() {
 }
 
 export function deauthorize() {
-    user.clear()
+    user.token = null
     window.location.reload()
 }
 
@@ -95,12 +84,13 @@ if (url.has('error')) {
     console.error(url.pull('error', 'error_description', 'error_uri'))
 }
 
-if (user.token && !user.login) {
+if (user.token) {
     try {
         const { data } = await rest.users.getAuthenticated()
         user.login = data.login
     } catch (e) {
-        user.clear()
+        user.token = null
+        window.location.reload()
     }
 }
 
@@ -110,8 +100,14 @@ if (signin) {
     if (user.login) {
         signin.className = 'text-success'
         signin.innerHTML = `${user.login} - Sign out`
-        signin.addEventListener('click', e => deauthorize())
+        signin.addEventListener('click', function(e) {
+            e.preventDefault()
+            deauthorize()
+        })
     } else {
-        signin.addEventListener('click', e => authorize())
+        signin.addEventListener('click', function(e) {
+            e.preventDefault()
+            authorize()
+        })
     }
 }

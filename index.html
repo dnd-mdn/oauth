@@ -34,8 +34,11 @@
     </main>
 
     <script type="module">
-        import { rest } from './oauth.js'
+        import * as oauth from './oauth.js'
 
+        window.oauth = oauth
+
+        /*
         async function userHTML() {
             const auth = await rest.auth()
 
@@ -57,7 +60,8 @@
 
         // Display result
         document.getElementById('gh-user').innerHTML = await userHTML()
-
+        */
+       
     </script>
 
 </body>

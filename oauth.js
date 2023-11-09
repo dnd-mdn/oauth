@@ -80,8 +80,8 @@ export async function codeExchange() {
     const response = await fetch(`https://caf-fac.ca/gh/create.asp?code=${code}&state=${state}`)
     const data = await response.json()
 
-    if (data.error) {
-        throw new Error(data.error)
+    if (data.message) {
+        throw new Error(data.message)
     }
 
     localStorage.setItem('gh-token', data.access_token)
@@ -100,8 +100,8 @@ export async function deauthorize() {
     const response = await fetch(`https://caf-fac.ca/gh/delete.asp?token=${token}`)
     const data = await response.json()
 
-    if (data.error) {
-        throw new Error(data.error)
+    if (data.message) {
+        throw new Error(data.message)
     }
     
     localStorage.removeItem('gh-token')

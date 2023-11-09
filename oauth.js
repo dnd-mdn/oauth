@@ -29,9 +29,6 @@ const url = {
     }
 }
 
-if (url.has('error')) {
-    console.error(url.pull('error', 'error_description', 'error_uri'))
-}
 
 
 export const clientId = 'Iv1.5dceb0507b750647'
@@ -111,34 +108,46 @@ export async function deauthorize() {
     window.location.reload()
 }
 
-if (url.has('code', 'state')) {
-    await codeExchange()
-}
+
 
 export const rest = new Octokit({
     auth: localStorage.getItem('gh-token')
 })
 
 
-const signin = document.getElementById('gh-signin')
 
-if (localStorage.getItem('gh-token')) {
-    try {
-        const { data } = await rest.users.getAuthenticated()
-        if (signin) {
-            signin.className = 'text-success'
-            signin.innerHTML = `${data.login} - Sign out`
-            signin.addEventListener('click', function (e) {
-                e.preventDefault()
-                deauthorize()
-            })
-        }
-    } catch (e) {
-        deauthorize()
+export async function init() {
+    if (url.has('error')) {
+        console.error(url.pull('error', 'error_description', 'error_uri'))
     }
-} else if (signin) {
-    signin.addEventListener('click', function (e) {
-        e.preventDefault()
-        authorize()
-    })
+    
+    if (url.has('code', 'state')) {
+        await codeExchange()
+    }
+
+    const signin = document.getElementById('gh-signin')
+
+    if (localStorage.getItem('gh-token')) {
+        try {
+            const { data } = await rest.users.getAuthenticated()
+            if (signin) {
+                signin.className = 'text-success'
+                signin.innerHTML = `${data.login} - Sign out`
+                signin.addEventListener('click', function (e) {
+                    e.preventDefault()
+                    deauthorize()
+                })
+            }
+        } catch (e) {
+            deauthorize()
+        }
+    } else if (signin) {
+        signin.addEventListener('click', function (e) {
+            e.preventDefault()
+            authorize()
+        })
+    }
 }
+
+
+

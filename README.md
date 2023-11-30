@@ -8,14 +8,27 @@ Our frontend applications are an interface to simplify managing our content. A m
 
 By signing in with GitHub, you are allowing applications to act on your behalf. They can only perform actions on projects that you are allowed to contribute to, so you may need to request access from the owner. You can later review or revoke the application [permissions](https://github.com/settings/connections/applications/6502d8679dcf3f0105f8).
 
-## 🪲 Issues
 
-Create a [new issue](https://github.com/dnd-mdn/oauth/issues/new) with a detailed description of the problem.
+## Usage
 
 
-## 📑 API
+```html
+<script type="module">
+        import * as oauth from './oauth.js'
+</script>
+```
 
-### `oauth.authorize()`
-### `oauth.user()`
-### `oauth.codeExchange()`
-### `oauth.deauthorize()`
+## 📑 API Reference
+
+### `authorize()`
+Initiates the authorization process and redirects the user to the authorization page.
+
+### `codeExchange()`
+Exchanges a temporary authorization code for an access token. 
+
+### `deauthorize()`
+Deauthorize the access token and revoke access for the current user.
+
+### `user()`
+Retrieve information about the authenticated user.
+

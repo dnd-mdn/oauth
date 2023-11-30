@@ -52,12 +52,6 @@ export async function codeExchange() {
     localStorage.setItem('gh-token', data.access_token);
 }
 
-export async function user() {
-    const token = localStorage.getItem('gh-token');
-    if (!token) { throw new Error('No stored token'); }
-    return await request(`https://caf-fac.ca/gh/check.asp?token=${token}`);
-}
-
 export async function deauthorize() {
     const token = localStorage.getItem('gh-token');
     if (!token) { throw new Error('No stored token'); }
@@ -66,7 +60,11 @@ export async function deauthorize() {
     window.location.reload();
 }
 
-
+export async function user() {
+    const token = localStorage.getItem('gh-token');
+    if (!token) { throw new Error('No stored token'); }
+    return await request(`https://caf-fac.ca/gh/check.asp?token=${token}`);
+}
 
 
 export let rest = new Octokit({

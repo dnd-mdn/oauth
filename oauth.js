@@ -47,14 +47,12 @@ export function authorize() {
 
 export async function codeExchange() {
     const { code, state } = pullParam('code', 'state');
-    if (!code || !state) { throw new Error('URL parameters "code" and "state" required'); }
     const data = await request(`https://caf-fac.ca/gh/create.asp?code=${code}&state=${state}`);
     localStorage.setItem('gh-token', data.access_token);
 }
 
 export async function deauthorize() {
     const token = localStorage.getItem('gh-token');
-    if (!token) { throw new Error('No stored token'); }
     await request(`https://caf-fac.ca/gh/delete.asp?token=${token}`);
     localStorage.removeItem('gh-token');
     window.location.reload();
@@ -62,7 +60,6 @@ export async function deauthorize() {
 
 export async function user() {
     const token = localStorage.getItem('gh-token');
-    if (!token) { throw new Error('No stored token'); }
     return await request(`https://caf-fac.ca/gh/check.asp?token=${token}`);
 }
 

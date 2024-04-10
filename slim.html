@@ -36,7 +36,8 @@
                     allow_signup: false
                 }));
             } else {
-                const data = await fetch(`https://caf-fac.ca/gh/create.asp?${params}`);
+                const response = await fetch(`https://caf-fac.ca/gh/create.asp?${params}`);
+                const data = response.json()
                 localStorage.setItem('gh-token', data.access_token);
             }
         }

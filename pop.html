@@ -14,31 +14,23 @@
 </head>
 
 <body>
-    <div class="container d-flex align-items-center justify-content-center">
+    <div id="status" class="container d-flex align-items-center justify-content-center">
         <div class="spinner-border text-primary" role="status">
             <span class="visually-hidden">Loading...</span>
         </div>
     </div>
     <script>
-        const client_id = 'Iv1.5dceb0507b750647';
-        const client_origin = 'https://dnd-mdn.github.io';
+        const params = new URLSearchParams(window.location.search);
+        const status = document.getElementById('status');
 
-        if (window.location.origin !== client_origin) {
-            throw new Error('Origin is not registered with this application')      
-        }
+        if (!params.get('code')) {
+            const client_id = 'Iv1.5dceb0507b750647';
+            const client_origin = 'https://dnd-mdn.github.io';
 
-        const token = localStorage.getItem('gh-token');
-        const params = new URLSearchParams(window.location.search)
+            if (window.location.origin !== client_origin) {
+                throw new Error('URL is not registered with this application');
+            }
 
-        if (token) {
-            localStorage.removeItem('gh-token');
-        }
-
-        if (params.get('code')) {
-            fetch(`https://caf-fac.ca/gh/create.asp?${params}`)
-                .then(response => response.json())
-                .then(data => localStorage.setItem('gh-token', data.access_token))
-        } else {
             window.location.replace('https://github.com/login/oauth/authorize?' + new URLSearchParams({
                 client_id,
                 redirect_uri: window.location,
@@ -46,7 +38,16 @@
                 allow_signup: false
             }));
         }
-        
+
+        fetch(`https://caf-fac.ca/gh/create.asp?${params}`)
+            .then(response => response.json())
+            .then(data => {
+                localStorage.setItem('gh-token', data.access_token)
+                status.innerHTML = '<div class="alert alert-success" role="alert">Sign in successful</div>';
+            }).catch(e => {
+                status.innerHTML = `<div class="alert alert-danger" role="alert">${e}</div>`;
+            })
+
     </script>
 </body>
 

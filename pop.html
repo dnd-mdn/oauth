@@ -13,7 +13,7 @@
 
         if (params.get('code')) {
             fetch('https://caf-fac.ca/gh/create.asp?' + params)
-                .then(response => response.json())
+                .then(response => response.text())
                 .then(data => localStorage.setItem('gh-auth', data));
         } else {
             if (window.location.origin !== 'https://dnd-mdn.github.io') {

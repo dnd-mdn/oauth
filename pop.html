@@ -3,50 +3,32 @@
 
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>GitHub Authentication</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <style>
-        .container {
-            height: 100vh
-        }
-    </style>
+    <title>GitHub app authentication</title>
 </head>
 
 <body>
-    <div id="status" class="container d-flex align-items-center justify-content-center">
-        <div class="spinner-border text-primary" role="status">
-            <span class="visually-hidden">Loading...</span>
-        </div>
-    </div>
+    <h1>GitHub app authentication</h1>
     <script>
         const params = new URLSearchParams(window.location.search);
-        const status = document.getElementById('status');
 
-        if (!params.get('code')) {
-            const client_id = 'Iv1.5dceb0507b750647';
-            const client_origin = 'https://dnd-mdn.github.io';
-
-            if (window.location.origin !== client_origin) {
-                throw new Error('URL is not registered with this application');
+        if (params.get('code')) {
+            fetch('https://caf-fac.ca/gh/create.asp?' + params)
+                .then(response => response.json())
+                .then(data => {
+                    localStorage.setItem('gh-token', data.access_token);
+                });
+        } else {
+            if (window.location.origin !== 'https://dnd-mdn.github.io') {
+                throw new Error('URI is not registered with this application');
             }
 
             window.location.replace('https://github.com/login/oauth/authorize?' + new URLSearchParams({
-                client_id,
+                client_id: 'Iv1.5dceb0507b750647',
                 redirect_uri: window.location,
                 state: Math.random().toString(36).substring(2),
                 allow_signup: false
             }));
         }
-
-        fetch(`https://caf-fac.ca/gh/create.asp?${params}`)
-            .then(response => response.json())
-            .then(data => {
-                localStorage.setItem('gh-token', data.access_token)
-                status.innerHTML = '<div class="alert alert-success" role="alert">Sign in successful</div>';
-            }).catch(e => {
-                status.innerHTML = `<div class="alert alert-danger" role="alert">${e}</div>`;
-            })
 
     </script>
 </body>

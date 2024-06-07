@@ -1,10 +1,14 @@
 import Container from 'react-bootstrap/Container';
 import Navbar from 'react-bootstrap/Navbar';
 
+
 import { useAuth0 } from '@auth0/auth0-react';
 
+
+
 function App() {
-  const { isLoading, isAuthenticated, error, user, getAccessTokenWithPopup, logout } = useAuth0();
+  const { isLoading, isAuthenticated, error, user, loginWithRedirect, logout } = useAuth0();
+
 
   let button = null
   if (isAuthenticated) {
@@ -17,7 +21,7 @@ function App() {
       </div>
     );
   } else {
-    button = <button onClick={() => getAccessTokenWithPopup()}>Log in</button>;
+    button = <button onClick={() => loginWithRedirect()}>Log in</button>;
   }
 
   return (

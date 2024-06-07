@@ -3,30 +3,12 @@
 
 <head>
     <meta charset="utf-8" />
-    <title>GitHub app authentication</title>
+    <title>GitHub App authentication</title>
 </head>
 
 <body>
-    <h1>GitHub app authentication</h1>
-    <script>
-        const params = new URLSearchParams(window.location.search);
-
-        if (params.get('code')) {
-            fetch('https://caf-fac.ca/gh/create.asp?' + params)
-                .then(response => response.text())
-                .then(data => localStorage.setItem('gh-auth', data));
-        } else {
-            if (window.location.origin !== 'https://dnd-mdn.github.io') {
-                throw new Error('URI is not registered with this application');
-            }
-            window.location.replace('https://github.com/login/oauth/authorize?' + new URLSearchParams({
-                client_id: 'Iv1.5dceb0507b750647',
-                redirect_uri: window.location,
-                state: Math.random().toString(36).substring(2),
-                allow_signup: false
-            }));
-        }
-    </script>
+    <h1>GitHub App authentication</h1>
+    <p>This window should close automatically.</p>
 </body>
 
 </html>

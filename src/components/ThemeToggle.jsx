@@ -12,7 +12,6 @@ const preference = window.matchMedia('(prefers-color-scheme: dark)').matches ? '
  * Toggle theme menu item
  */
 function ThemeToggle({ className, size = 22 }) {
-    
     const [theme, setTheme] = useLocalStorageState('theme', { defaultValue: preference });
     const toggleTheme = () => setTheme(theme === 'dark' ? 'light' : 'dark');
 

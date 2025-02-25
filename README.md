@@ -2,33 +2,17 @@
 
 ## 📖 Overview
 
-Our frontend applications are an interface to simplify managing our content. A major benefit is the ability to run them in any web browser, even on DWAN 😲. GitHub then acts as the backend to store our content, but it can do much more than that. It provides an entire ecosystem of version control and hosting tools.
+This project handles OAuth authentication for our GitHub app.  See [example](https://dnd-mdn.github.io/oauth) page.
 
-## 🔐 Permissions
+Once authenticated, applications on the same domain can interact with GitHub on the users behalf. It allows building of front end tools to simplify the management of our GitHub content.
 
-By signing in with GitHub, you are allowing applications to act on your behalf. They can only perform actions on projects that you are allowed to contribute to, so you may need to request access from the owner. You can later review or revoke the application [permissions](https://github.com/settings/connections/applications/6502d8679dcf3f0105f8).
+## 🔧 Usage
 
+Popup windows are opened to perform the authentication actions.
 
-## Usage
-
-
-```html
-<script type="module">
-        import * as oauth from './oauth.js'
-</script>
+```js
+window.open('https://dnd-mdn.github.io/oauth/login');
+window.open('https://dnd-mdn.github.io/oauth/logout');
 ```
 
-## 📑 API Reference
-
-### `authorize()`
-Initiates the authorization process and redirects the user to the authorization page.
-
-### `codeExchange()`
-Exchanges a temporary authorization code for an access token. 
-
-### `deauthorize()`
-Deauthorize the access token and revoke access for the current user.
-
-### `user()`
-Retrieve information about the authenticated user.
-
+Applications can listen to `localStorage` change events to handle changes in authentication state.

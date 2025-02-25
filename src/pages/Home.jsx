@@ -19,11 +19,11 @@ const Home = () => {
     const [auth] = useLocalStorageState(process.env.REACT_APP_GITHUB_AUTH_KEY);
 
     const login = () => {
-        window.open(`/oauth/login`, 'Sign in with GitHub', 'width=500,height=500');
-    };
+        window.open(`/oauth/login.html`, 'Sign in with GitHub', 'width=500,height=500');
+    }
 
     const logout = () => {
-        window.open(`/oauth/logout`, 'Sign in with GitHub', 'width=500,height=500');
+        window.open(`/oauth/logout.html`, 'Sign in with GitHub', 'width=500,height=500');
     }
 
     return (

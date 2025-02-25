@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <title>Login</title>
+</head>
+
+<body>
+    <h1 id="title" style="font-size:20px">Logging in...</h1>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <script>
+        const api = window.location.hostname === "localhost" ? '/proxy' : 'https://forces-assets.canada.ca/oauth';
+        const title = document.getElementById('title');
+        const searchParams = new URLSearchParams(window.location.search);
+
+        if (!searchParams.has('code') || !searchParams.has('state')) {
+            title.innerHTML = 'Redirecting to GitHub...';
+
+            const params = new URLSearchParams({
+                client_id: 'Iv1.5dceb0507b750647',
+                state: Math.random().toString(36).substring(2),
+                allow_signup: false,
+                redirect_uri: `${window.location.origin}/oauth/login.html`,
+            });
+
+            window.location.assign(`https://github.com/login/oauth/authorize?${params}`);
+        } else {
+            fetch(`${api}/create.php?${searchParams}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        throw new Error(data.error);
+                    }
+
+                    title.innerHTML = 'Logged in successfully';
+                    localStorage.setItem('github-auth', JSON.stringify(data));
+                    window.close();
+                })
+                .catch(error => {
+                    title.innerHTML = 'Something went wrong';
+                    console.error(error);
+                });
+        }
+    </script>
+</body>
+
+</html>

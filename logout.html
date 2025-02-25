@@ -12,12 +12,12 @@
     <script>
         const api = window.location.hostname === "localhost" ? '/proxy' : 'https://forces-assets.canada.ca/oauth';
         const title = document.getElementById('title');
-        const auth = localStorage.getItem('github-auth');
+        const auth = JSON.parse(localStorage.getItem('github-auth'));
 
         if (!auth) {
             title.innerHTML = 'Something went wrong';
         } else {
-            fetch(`${api}/delete.php?token=${auth?.access_token}`)
+            fetch(`${api}/delete.php?token=${auth.access_token}`)
                 .then(response => response.json())
                 .then(data => {
                     if (data.error) {

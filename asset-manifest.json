@@ -1,10 +1,10 @@
 {
   "files": {
-    "main.css": "/oauth/static/css/main.09156330.css",
-    "main.js": "/oauth/static/js/main.7124c0b6.js",
-    "index.html": "/oauth/index.html",
-    "main.09156330.css.map": "/oauth/static/css/main.09156330.css.map",
-    "main.7124c0b6.js.map": "/oauth/static/js/main.7124c0b6.js.map"
+    "main.css": "https://dnd-mdn.github.io/oauth/static/css/main.09156330.css",
+    "main.js": "https://dnd-mdn.github.io/oauth/static/js/main.7124c0b6.js",
+    "index.html": "https://dnd-mdn.github.io/oauth/index.html",
+    "main.09156330.css.map": "https://dnd-mdn.github.io/oauth/static/css/main.09156330.css.map",
+    "main.7124c0b6.js.map": "https://dnd-mdn.github.io/oauth/static/js/main.7124c0b6.js.map"
   },
   "entrypoints": [
     "static/css/main.09156330.css",
